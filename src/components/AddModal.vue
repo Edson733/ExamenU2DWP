@@ -14,11 +14,11 @@
                 <b-form-group id="autor-group" class="mt-3" label="Autor" label-for="autor">
                     <b-form-input id="autor" v-model="form.autor" type="text" name="autor" required></b-form-input>
                 </b-form-group>
-                <b-form-group id="category-group" class="mt-3" label="Genero" label-for="category">
-                    <b-form-select id="category" v-model="form.category.id" :options="categories" value-field="id" text-field="name"/>
-                </b-form-group>
                 <b-form-group id="publicacion-group" class="mt-3" label="Año de Publicacion" label-for="publicacion">
-                    <b-form-input id="publicacion" v-model="form.año" type="number" name="publicacion" required></b-form-input>
+                    <b-form-input id="publicacion" v-model="form.año" type="date" name="publicacion" required></b-form-input>
+                </b-form-group>
+                <b-form-group class="mt-3" label="Imagen" label-for="img">
+                    <input type="file" @change="uploadImage" />
                 </b-form-group>
             </b-form>
             <ModalSpinner :isLoading="isLoading" />
@@ -28,9 +28,8 @@
 
 <script>
     import Vue from "vue";
-    //import bookService from "../services/Book";
-    //import categoryService from "../services/Category";
-
+   import axios from "axios";
+   import services from '../services/services'
     export default Vue.extend({
         components: {
             ModalSpinner: () => import("@/components/ModalSpinner.vue"),
@@ -40,28 +39,48 @@
                 form: {
                     name: null,
                     autor: null,
-                    category: {
-                        id: null,
-                    },
                     año: null,
+                    file:null
                 },
-                categories: [],
                 errors: [],
                 isLoading: false,
             };
         },
         mounted() {
-            this.getCategories();
+            
         },
         methods: {
-            async getCategories() {
-                try {
-                    const data = await categoryService.getCategories();
-                    this.categories = [...data];
-                } catch (error) {
-                    console.error(error);
-                }
-            },
+    async uploadImage(event) {
+            this.loading = true;
+
+            const file = event.target.files[0];
+            const formData = new FormData();
+            formData.append('upload_preset', 'bookstore');
+            formData.append('file', file);
+            formData.append('api_key', '349172557836694396565225139577');
+            formData.append('folder', 'books');
+
+            try {
+                const response = await axios.post(
+                    'https://api.cloudinary.com/v1_1/iotimages/books',
+                    formData,
+                    {
+                headers: {
+                'Content-Type': 'multipart/form-data',
+                'Access-Control-Allow-Origin': 'http://localhost:5173',
+                skip: 'true' 
+                
+            },                    }
+                );
+                this.file = response.secure_url;
+
+                console.log(response.data);
+            } catch (error) {
+                console.error(error);
+            } finally {
+                this.loading = false;
+            }
+        },
             async validarForm(e) {
                 this.errors = [];
 
@@ -71,10 +90,6 @@
 
                 if (!this.form.autor) {
                     this.errors.push("Nombre del autor obligatorio.");
-                }
-
-                if (!this.form.category.id) {
-                    this.errors.push("Genero del libro es obligatorio.");
                 }
 
                 if (!this.form.año) {
@@ -107,7 +122,8 @@
                 this.validarForm();
                 this.isLoading = true;
                 try {
-                    const response = await bookService.saveBook(this.form);
+                    
+                    const response = await services.postBook(this.form);
                     if (!response.error) {
                         this.isLoading = false;
                         this.resetModal();
