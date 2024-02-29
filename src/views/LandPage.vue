@@ -51,7 +51,6 @@
         methods: {
             handleScroll() {
                 const currentScrollPosition = window.pageYOffset || document.documentElement.scrollTop;
-                console.log(currentScrollPosition);
                 if (Math.abs(currentScrollPosition - this.lastScrollPosition) < 60) {
                     return;
                 }
