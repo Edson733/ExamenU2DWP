@@ -1,0 +1,75 @@
+<template>
+    <b-col>
+        <b-container fluid>
+            <div class="container-fluid d-flex justify-content-center mt-3">
+                <ModalSpinner :isLoading="isLoading"/>
+                <b-row v-if="!isLoading">
+                    <b-col v-for="(book, idx) in books" :key="idx" class="col-xs-6 col-sm-6 col-md-2 col-lg-2 mb-4">
+                        <b-card :title="book.name" img-src="https://www.enago.com/academy/wp-content/uploads/2021/12/BookChapter-750x340.jpg" img-alt="Image" img-top tag="article" style="max-width: 15rem" class="card rounded shadow mb-2">
+                            <b-card-text>
+                                <b>Autor:</b> {{ book.autor }}
+                                <br/>
+                                <b>Genero:</b> {{ book.category.name }}
+                                <br/>
+                                <b>Año de publicación:</b> {{ book.año }}
+                            </b-card-text>
+                        </b-card>
+                    </b-col>
+                </b-row>
+            </div>
+        </b-container>
+    </b-col>
+</template>
+
+<script>
+    import Vue from "vue";
+    //import bookService from "../services/Book";
+
+    export default Vue.extend({
+        data() {
+            return {
+                books: [],
+                isLoading: true,
+            };
+        },
+        components: {
+            ModalSpinner: () => import("@/components/ModalSpinner.vue"),
+        },
+        mounted() {
+            this.getAllBooks();
+        },
+        methods: {
+            async getAllBooks() {
+                try {
+                    const data = await bookService.getAllBooks();
+                    this.books = [...data];
+                    this.isLoading = false;
+                } catch (error) {
+                    console.log(error);
+                }
+            },
+        }
+    });
+</script>
+
+<style>
+    .card {
+        transition: transform 0.3s ease-in-out;
+        cursor: pointer;
+        animation: fade-in 0.5s ease forwards;
+        opacity: 0;   
+    }
+
+    .card:hover {
+        transform: scale(1.05);
+    }
+
+    @keyframes fade-in {
+        from {
+            opacity: 0;
+        }
+        to {
+            opacity: 1;
+        }
+    }
+</style>
