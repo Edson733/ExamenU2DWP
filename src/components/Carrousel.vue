@@ -21,7 +21,7 @@
                   <p>{{ book.autor }}</p>
                 </b-carousel-slide>
               </template>
-              <b-carousel-slide caption="Blank Image" img-blank img-alt="Blank image">
+              <b-carousel-slide v-if="books.length === 0" caption="Blank Image" img-blank img-alt="Blank image">
                 <p>
                   Lorem ipsum dolor sit amet, consectetur adipiscing elit. Suspendisse eros felis, tincidunt a tincidunt
                   eget, convallis vel est. Ut pellentesque ut lacus vel interdum.

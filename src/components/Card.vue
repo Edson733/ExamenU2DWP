@@ -1,13 +1,18 @@
 <template>
     <b-container fluid>
         <b-row>
-            <b-col cols="10" sm="12" md="10" lg="10">
+            <b-col v-for="book in books" :key="index" cols="2" sm="12" md="2" lg="2">
+                <div v-if="books.length === 0" class="col-12 text-center">
+        <p>No hay registros disponibles.</p>
+      </div>
                 <div>
-                    <b-card draggable="true" @dragover.prevent @dragenter.prevent @dragstart="handleDragStart($event, book)" title="Libro" img-src="https://www.enago.com/academy/wp-content/uploads/2021/12/BookChapter-750x340.jpg" img-alt="Image" img-top tag="article" style="max-width: 20rem;" class="card rounded shadow mb-2 drag-el">
+                    <b-card draggable="true" @dragover.prevent @dragenter.prevent @dragstart="handleDragStart($event, book)" title="" img-src="https://www.enago.com/academy/wp-content/uploads/2021/12/BookChapter-750x340.jpg" img-alt="Image" img-top tag="article" style="max-width: 20rem;" class="card rounded shadow mb-2 drag-el">
                         <b-card-text>
-                            <b>Autor:</b> Autor
+                            <b>Nombre del libro:</b> {{ book.name }}
                             <br/>
-                            <b>Año de publicación:</b> Año
+                            <b>Autor:</b> {{ book.autor }}
+                            <br/>
+                            <b>Año de publicación:</b> {{book.año}}
                         </b-card-text>
                     </b-card>
                 </div>
@@ -33,7 +38,7 @@
 
 <script>
     import Vue from "vue";
-    //import bookService from "../services/Book";
+    import services from "../services/services";
 
     export default Vue.extend({
         data() {
@@ -64,7 +69,7 @@
             },
             async getAllBooks() {
                 try {
-                    const data = await bookService.getAllBooks();
+                    const data = await services.getBooks();
                     this.books = [...data];
                     this.isLoading = false;
                 } catch (error) {
