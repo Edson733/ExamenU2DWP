@@ -2,7 +2,7 @@
     <div>
         <b-modal id="EditModal" @hidden="closeModal" @ok="handleOk" @cancel="closeModal" hide-header-close title="Editar" cancel-title="Cancelar" cancel-variant="outline-danger" ok-title="Editar" ok-variant="outline-success" hide-backdrop content-class="shadow">
             <b-form class="my-4" @submit.prevent="validarForm" @submit="handleSubmit">
-                <p v-if="errors.length">
+                <p v-if="errors.length"> 
                     <b>{{ errors.length > 1 ? "Por favor corrige los siguientes errores: " : "Por favor corrige el siguiente error: " }}</b>
                     <ul>
                         <li v-for="error in errors" :key="error.index">{{ error }}</li>
@@ -14,11 +14,11 @@
                 <b-form-group id="autor-group" class="mt-3" label="Autor" label-for="autor">
                     <b-form-input id="autor" v-model="book.autor" type="text" name="autor" required></b-form-input>
                 </b-form-group>
-                <b-form-group id="category-group" class="mt-3" label="Genero" label-for="category">
-                    <b-form-select id="category" v-model="book.category.id" :options="categories" value-field="id" text-field="name"/>
-                </b-form-group>
                 <b-form-group id="publicacion-group" class="mt-3" label="Año de Publicacion" label-for="publicacion">
-                    <b-form-input id="publicacion" v-model="book.año" type="number" name="publicacion" required></b-form-input>
+                    <b-form-input id="publicacion" v-model="book.año" type="date" name="publicacion" required></b-form-input>
+                </b-form-group>
+                <b-form-group class="mt-3" label="Imagen" label-for="img">
+                    <input type="file" @change="uploadImage" />
                 </b-form-group>
             </b-form>
             <ModalSpinner :isLoading="isLoading" />
@@ -28,8 +28,8 @@
 
 <script>
     import Vue from "vue";
-    //import bookService from "../services/Book";
-    //import categoryService from "../services/Category";
+    import axios from "axios";
+    import services from '../services/services';
 
     export default Vue.extend({
         components: {
@@ -40,21 +40,40 @@
         },
         data() {
             return {
-                categories: [],
                 errors: [],
                 isLoading: false,
             };
         },
-        mounted() {
-            this.getCategories();
-        },
         methods: {
-            async getCategories() {
+            async uploadImage(event) {
+                this.loading = true;
+
+                const file = event.target.files[0];
+                const formData = new FormData();
+                formData.append('upload_preset', 'bookstore');
+                formData.append('file', file);
+                formData.append('api_key', '349172557836694396565225139577');
+                formData.append('folder', 'books');
+
                 try {
-                    const data = await categoryService.getCategories();
-                    this.categories = [...data];
+                    const response = await axios.post(
+                        'https://api.cloudinary.com/v1_1/iotimages/books',
+                        formData,
+                        {
+                    headers: {
+                    'Content-Type': 'multipart/form-data',
+                    'Access-Control-Allow-Origin': 'http://localhost:5173',
+                    skip: 'true' 
+                    
+                },                    }
+                    );
+                    this.file = response.secure_url;
+
+                    console.log(response.data);
                 } catch (error) {
                     console.error(error);
+                } finally {
+                    this.loading = false;
                 }
             },
             async validarForm(e) {
@@ -66,10 +85,6 @@
 
                 if (!this.book.autor) {
                     this.errors.push("Nombre del autor obligatorio.");
-                }
-
-                if (!this.book.category.id) {
-                    this.errors.push("Genero del libro es obligatorio.");
                 }
 
                 if (!this.book.año) {
@@ -97,7 +112,7 @@
                 this.validarForm();
                 this.isLoading = true;
                 try {
-                    const response = await bookService.updateBook(this.book);
+                    const response = await services.updateBook(this.book);
                     if (!response.error) {
                         this.isLoading = false;
                         this.$emit('BookEdited', response);
