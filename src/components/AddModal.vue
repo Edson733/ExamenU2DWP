@@ -46,41 +46,38 @@
                 isLoading: false,
             };
         },
-        mounted() {
-            
-        },
         methods: {
-    async uploadImage(event) {
-            this.loading = true;
+            async uploadImage(event) {
+                this.loading = true;
 
-            const file = event.target.files[0];
-            const formData = new FormData();
-            formData.append('upload_preset', 'bookstore');
-            formData.append('file', file);
-            formData.append('api_key', '349172557836694396565225139577');
-            formData.append('folder', 'books');
+                const file = event.target.files[0];
+                const formData = new FormData();
+                formData.append('upload_preset', 'bookstore');
+                formData.append('file', file);
+                formData.append('api_key', '349172557836694396565225139577');
+                formData.append('folder', 'books');
 
-            try {
-                const response = await axios.post(
-                    'https://api.cloudinary.com/v1_1/iotimages/books',
-                    formData,
-                    {
-                headers: {
-                'Content-Type': 'multipart/form-data',
-                'Access-Control-Allow-Origin': 'http://localhost:5173',
-                skip: 'true' 
-                
-            },                    }
-                );
-                this.file = response.secure_url;
+                try {
+                    const response = await axios.post(
+                        'https://api.cloudinary.com/v1_1/iotimages/books',
+                        formData,
+                        {
+                    headers: {
+                    'Content-Type': 'multipart/form-data',
+                    'Access-Control-Allow-Origin': 'http://localhost:5173',
+                    skip: 'true' 
+                    
+                },                    }
+                    );
+                    this.file = response.secure_url;
 
-                console.log(response.data);
-            } catch (error) {
-                console.error(error);
-            } finally {
-                this.loading = false;
-            }
-        },
+                    console.log(response.data);
+                } catch (error) {
+                    console.error(error);
+                } finally {
+                    this.loading = false;
+                }
+            },
             async validarForm(e) {
                 this.errors = [];
 
@@ -108,9 +105,6 @@
             resetModal() {
                 this.form.name = null
                 this.form.autor = null
-                this.form.category = {
-                    id: null
-                }
                 this.form.año = null
                 this.errors = []
             },

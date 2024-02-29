@@ -20,7 +20,20 @@ const postBook = async (book) => {
        throw error;
     }
  };
+
+ const updateBook = async (book) => {
+   try {
+      console.log(book);
+      const response = await axios.post(url+"/update", book);
+      console.log(response.data);
+      return response.data;
+   } catch (error) {
+      throw error;
+   }
+ }
+
  export default {
     getBooks,
     postBook,
+    updateBook,
  };
