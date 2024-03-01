@@ -56,19 +56,10 @@
                 formData.append('folder', 'books');
 
                 try {
-                    const response = await axios.post(
-                        'https://api.cloudinary.com/v1_1/iotimages/books',
-                        formData,
-                        {
-                    headers: {
-                    'Content-Type': 'multipart/form-data',
-                    'Access-Control-Allow-Origin': 'http://localhost:5173',
-                    skip: 'true' 
-                    
-                },                    }
-                    );
+                    const response = await axios.post('https://api.cloudinary.com/v1_1/iotimages/books', formData, {
+                        headers: {'Content-Type': 'multipart/form-data', 'Access-Control-Allow-Origin': 'http://localhost:5173', skip: 'true'},
+                    });
                     this.file = response.secure_url;
-
                     console.log(response.data);
                 } catch (error) {
                     console.error(error);

@@ -3,13 +3,11 @@
         <b-row>
             <b-col v-for="book in books" :key="index" cols="2" sm="12" md="2" lg="2">
                 <div v-if="books.length === 0" class="col-12 text-center">
-        <p>No hay registros disponibles.</p>
-      </div>
+                    <p>No hay registros disponibles.</p>
+                </div>
                 <div>
-                    <b-card draggable="true" @dragover.prevent @dragenter.prevent @dragstart="handleDragStart($event, book)" title="" img-src="https://www.enago.com/academy/wp-content/uploads/2021/12/BookChapter-750x340.jpg" img-alt="Image" img-top tag="article" style="max-width: 20rem;" class="card rounded shadow mb-2 drag-el">
+                    <b-card draggable="true" @dragstart="handleDragStart(book, $event)" :title="book.name" img-src="https://www.enago.com/academy/wp-content/uploads/2021/12/BookChapter-750x340.jpg" img-alt="Image" img-top tag="article" style="max-width: 20rem;" class="card rounded shadow mb-2">
                         <b-card-text>
-                            <b>Nombre del libro:</b> {{ book.name }}
-                            <br/>
                             <b>Autor:</b> {{ book.autor }}
                             <br/>
                             <b>Año de publicación:</b> {{book.año}}
@@ -20,18 +18,18 @@
             <b-col cols="2" sm="12" md="2" lg="2">
                 <b-row class="text-center">
                     <b-col cols="12" sm="12" class="mb-2">
-                        <div class="box1 rounded shadow" @drop="onDropUpdate($event)" @dragover.prevent @dragenter.prevent>
+                        <div class="box1 rounded shadow" @dragover.prevent @drop="handleEdit">
                             <b-icon class="icon" icon="pencil" aria-hidden="true"></b-icon>
                         </div>
-                        <EditModal/>
                     </b-col>
                     <b-col cols="12" sm="12" class="mb-2">
-                        <div class="box2 rounded shadow" @drop="onDrop($event)" @dragover.prevent @dragenter.prevent>
+                        <div class="box2 rounded shadow" @dragover.prevent @drop="handleDelete">
                             <b-icon class="icon" icon="trash-fill" aria-hidden="true"></b-icon>
                         </div>
                     </b-col>
                 </b-row>
             </b-col>
+            <EditModal :book="draggedBook"/>
         </b-row>
     </b-container>
 </template>
@@ -45,7 +43,6 @@
             return {
                 books: [],
                 isLoading: true,
-                selectedBook: null,
             };
         },
         components: {
@@ -56,16 +53,29 @@
             this.getAllBooks();
         },
         methods: {
-            handleDragStart(event, book){
-                event.dataTransfer.dropEffect = "move";
-                event.dataTransfer.effectAllowed = "move";
-                event.dataTransfer.setData("book", book.id);
-                this.selectedBook = { ...book };
+            handleDragStart(book, event) {
+                this.draggedBook = book;
+                event.dataTransfer.setData('text/plain', book.title);
             },
-            onDropUpdate(book) {
-                this.$nextTick(() => {
-                    this.$bvModal.show("EditModal");
-                });
+            async handleDelete(event){
+                event.preventDefault();
+                const bookId = event.dataTransfer.getData("bookId");
+                const bookToDelete = this.books.find(book => book.id === bookId) || this.draggedBook;
+                if (bookToDelete) {
+                    console.log(bookToDelete.id);
+                    const data = await services.deleteBook(bookToDelete.id);
+                    if (data) {
+                        await this.getAllBooks();
+                    }
+                }
+            },
+            handleEdit(event) {
+                event.preventDefault();
+                const bookId = event.dataTransfer.getData("bookId");
+                const bookToEdit = this.books.find(book => book.id === bookId) || this.draggedBook;
+                if (bookToEdit) {
+                    this.openEditModal(bookToEdit);
+                }
             },
             async getAllBooks() {
                 try {
@@ -76,11 +86,9 @@
                     console.log(error);
                 }
             },
-            editModal() {
-                this.$nextTick(() => {
-                    this.$bvModal.show("EditModal");
-                });
-            },
+            openEditModal(book) {
+                this.$bvModal.show('EditModal');
+            }
         }
     });
 </script>

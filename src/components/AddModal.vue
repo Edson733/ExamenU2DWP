@@ -1,6 +1,6 @@
 <template>
     <div>
-        <b-modal id="AddModal" @show="resetModal" @hidden="resetModal" @ok="handleOk" @cancel="resetModal" hide-header-close title="Agregar" cancel-title="Cancelar" cancel-variant="outline-danger" ok-title="Añadir" ok-variant="outline-success">
+        <b-modal id="AddModal" @show="resetModal" @hidden="resetModal" @ok="handleOk" @cancel="resetModal" hide-header-close title="Agregar un nuevo libro" cancel-title="Cancelar" cancel-variant="outline-danger" ok-title="Añadir" ok-variant="outline-success">
             <b-form class="my-4" @submit.prevent="validarForm" @submit="handleSubmit">
                 <p v-if="errors.length">
                     <b>{{ errors.length > 1 ? "Por favor corrige los siguientes errores: " : "Por favor corrige el siguiente error: " }}</b>
@@ -21,15 +21,16 @@
                     <input type="file" @change="uploadImage" />
                 </b-form-group>
             </b-form>
-            <ModalSpinner :isLoading="isLoading" />
+            <ModalSpinner :isLoading="isLoading"/>
         </b-modal>
     </div>
 </template>
 
 <script>
     import Vue from "vue";
-   import axios from "axios";
-   import services from '../services/services'
+    import axios from "axios";
+    import services from '../services/services';
+
     export default Vue.extend({
         components: {
             ModalSpinner: () => import("@/components/ModalSpinner.vue"),
@@ -58,19 +59,10 @@
                 formData.append('folder', 'books');
 
                 try {
-                    const response = await axios.post(
-                        'https://api.cloudinary.com/v1_1/iotimages/books',
-                        formData,
-                        {
-                    headers: {
-                    'Content-Type': 'multipart/form-data',
-                    'Access-Control-Allow-Origin': 'http://localhost:5173',
-                    skip: 'true' 
-                    
-                },                    }
-                    );
+                    const response = await axios.post('https://api.cloudinary.com/v1_1/iotimages/books',formData,{
+                        headers: {'Content-Type': 'multipart/form-data', 'Access-Control-Allow-Origin': 'http://localhost:5173', skip: 'true'},
+                    });
                     this.file = response.secure_url;
-
                     console.log(response.data);
                 } catch (error) {
                     console.error(error);
